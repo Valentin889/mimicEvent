@@ -1,13 +1,17 @@
-val scala3Version = "3.4.2"
+name         := "testGraphic"
+organization := "myscalafx"
+version      := "0.1-SNAPSHOT"
 
-lazy val root = project
-  .in(file("."))
-  .settings(
-    name := "mimicEvent",
-    version := "0.1.0-SNAPSHOT",
+scalaVersion := "2.13.12"
 
-    scalaVersion := scala3Version,
+libraryDependencies ++= Seq(
+  "org.scalafx"   %% "scalafx"   % "21.0.0-R32",
+  "org.scalatest" %% "scalatest" % "3.2.17" % "test"
+)
 
-    libraryDependencies += "org.scalafx" %% "scalafx" % "16.0.0-R24",
-    libraryDependencies += "org.scalameta" %% "munit" % "1.0.0" % Test
-  )
+// Fork a new JVM for 'run' and 'test:run' to avoid JavaFX double initialization problems
+fork := true
+
+// set the main class for the main 'run' task
+// change Compile to Test to set it for 'test:run'
+Compile / run / mainClass := Some("my.scalafx.ScalaFXHelloWorld")
