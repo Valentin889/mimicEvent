@@ -175,20 +175,77 @@ class Board(rows: Int, cols: Int) {
 
     // Find all connected sets of visitable squares
     val connectedSets = createConnectedSet()
-    
-    // Find all combinations of 10 squares to remove that enclose at least one square
-
-    
-    val combinations = findCombinations(10)
-    println("valide combinaison length" + combinations.length)
-    printConnectedSets(combinations.toList)
-    
-    /* 
-    */
-    // 
 
   }
 
+  def d(sq: Square, j:Int, s: Set[Square]): Int = {
+    val x = sq.getX
+    val y = sq.getY
+    if ( x==0 || y==0 || x==rows-1 || y==cols-1 || (j==0 && !isSetClosed(s))) {
+      return 0
+    }
+
+    if ( j>=0 && isSetClosed(s)) {
+      return s.size
+    }
+    
+    var i = 0
+    for {
+      square <- s
+    } {
+      if (square.getX != x && square.getY != y) {
+        
+        val sq2 = computeNextMove(sq, s-square)
+        val temp = d(sq2, j-1, s-square)
+        if (temp > i) {
+          i = temp
+        }
+      }
+    }
+    return i
+  }
+    
+  
+  def computeNextMove(sq: Square, s:Set[Square]): Square = {
+    //Find all closest exit
+
+  
+    //When multiple choice first go down, left, up, right
+
+    return sq
+  }
+
+  def n(sq: Square, s:Set[Square]): (Square, Int) = {
+    val x = sq.getX
+    val y = sq.getY
+    if ( x==0 || y==0 || x==rows-1 || y==cols-1 || (j==0 && !isSetClosed(s))) {
+      return (sq, 0)
+    }
+
+    var i = 0
+    var sq2 = sq
+    for {
+      square <- sq.neighbors
+    }
+    {
+      if (s.contains(square)) {
+        val temp = n(square, s-sq)
+        if (temp._2 > i) {
+          i = temp._2
+          sq2 = temp._1
+        }
+        else if (temp._2 == i) {
+          // down, left, up, right
+
+        }
+      }
+    }
+
+    return (sq2, i)
+
+
+  }
+  
 
   def printConnectedSets(connectedSets: List[Set[Square]]): Unit = {
   for {
