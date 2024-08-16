@@ -480,7 +480,7 @@ class Test extends AnyFunSuite {
       set <- connectedSets
     } {
      if (set.contains(b.squares(3)(3))) {
-      val finalVal = b.d(b.squares(3)(3), 10, set, List())
+      val finalVal = b.maxSetWithoutCareOfMimic(b.squares(3)(3), 10, set, List())
       assertResult(7) {
         finalVal._1
       }

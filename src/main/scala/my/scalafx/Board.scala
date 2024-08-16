@@ -6,6 +6,7 @@ class Board(rows: Int, cols: Int) {
   val squares: Array[Array[Square]] = Array.tabulate(rows, cols)((x, y) => new Square(x, y, visitable = true))
 
   var memory: Map[(Square, Int, Set[Square]), (Int, List[Square])] = Map()
+  var memory2: Map[(Int, Set[Square]), (Int, List[Square])] = Map()
   // Initialize neighbors for each square
   for {
     x <- 0 until rows
@@ -173,6 +174,7 @@ class Board(rows: Int, cols: Int) {
 
   def start(): Unit = {
     memory = Map()
+    memory2 = Map()
     // algo logic
 
     // Find all connected sets of visitable squares
@@ -260,6 +262,7 @@ class Board(rows: Int, cols: Int) {
         }
       }
     }
+
     //println("End Return with size : " + max + " and moves size: " + newMovesMax.size)
     memory += ((sq, j, s) -> (max, newMovesMax))
     return (max, newMovesMax)
@@ -273,6 +276,55 @@ class Board(rows: Int, cols: Int) {
     //When multiple choice first go down, left, up, right
 
     return sq
+  }
+
+  def maxSetWithoutCareOfMimic(starting:Square, j: Int, s: Set[Square], moves: List[Square]): (Int, List[Square]) = {
+    val mem = memory2.get((j, s))
+    mem match {
+      case Some(value) => 
+        return value
+      case None =>
+    }
+
+    if (j == 0 && !isSetClosed(s)) {
+      memory2 += ((j, s) -> (Int.MinValue, List()))
+      return (Int.MinValue, List())
+    }
+
+    if (j >= 0 && isSetClosed(s)) {
+      memory2 += ((j, s) -> (s.size, moves))
+      return (s.size, moves)
+    }
+
+    var max = Int.MinValue
+    var newMovesMax = moves
+    for {
+      square <- s
+    } {
+      if(square.visitable){
+        square.visitable = false
+        var newSet = s - square
+        for {
+          s <- createConnectedSet(squares)
+        } {
+          if (s.contains(starting)) {
+            newSet = s
+          }
+        }
+
+        val tempVal = maxSetWithoutCareOfMimic(starting, j-1, newSet, moves :+ square)
+        if (tempVal._1 > max) {
+          max = tempVal._1
+          newMovesMax = tempVal._2
+        } else if (tempVal._1 == max && tempVal._2.size < newMovesMax.size) {
+          max = tempVal._1
+          newMovesMax = tempVal._2
+        }
+        square.visitable = true
+      }
+    }
+    memory2 += ((j, s) -> (max, newMovesMax))
+    return (max, newMovesMax)
   }
 
   /* 
