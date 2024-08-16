@@ -5,6 +5,7 @@ class Board(rows: Int, cols: Int) {
   // Create a 2D array of squares
   val squares: Array[Array[Square]] = Array.tabulate(rows, cols)((x, y) => new Square(x, y, visitable = true))
 
+  var memory: Map[(Square, Int, Set[Square]), (Int, List[Square])] = Map()
   // Initialize neighbors for each square
   for {
     x <- 0 until rows
@@ -171,6 +172,7 @@ class Board(rows: Int, cols: Int) {
   }
 
   def start(): Unit = {
+    memory = Map()
     // algo logic
 
     // Find all connected sets of visitable squares
@@ -179,36 +181,56 @@ class Board(rows: Int, cols: Int) {
       set <- connectedSets
     } {
      if (set.contains(squares(3)(3))) {
-        println(d(squares(3)(3), 10, set))
+        val finalVal = d(squares(3)(3), 1, set, List())
+        println(finalVal._1)
+        for {
+          square <- finalVal._2
+        } {
+          println(s"Square x: ${square.getX} y: ${square.getY}")
+        }
      }
     }
 
   }
 
-  def d(sq: Square, j:Int, s: Set[Square]): Int = {
-    println("Try with sq: "+ sq.getX + "/" + sq.getY + " j: " + j)
+  def d(sq: Square, j:Int, s: Set[Square], moves: List[Square]): (Int, List[Square]) = {
   
+    //println("Try with sq: "+ sq.getX + "/" + sq.getY + " j: " + j)
+    
+    val mem = memory.get((sq, j, s))
+    mem match {
+      case Some(value) => return value
+      case None => 
+    }
+      
+
     val x = sq.getX
     val y = sq.getY
     if ( x==0 || y==0 || x==rows-1 || y==cols-1 || (j==0 && !isSetClosed(s))) {
-      return Int.MinValue
+      memory += ((sq, j, s) -> (Int.MinValue, List()))
+      return (Int.MinValue, List())
     }
 
     if ( j>=0 && isSetClosed(s)) {
-      return s.size
+      //println("Return with size : " + s.size + " and moves size: " + moves.size)
+      memory += ((sq, j, s) -> (s.size, moves))
+      return (s.size, moves)
     }
     
     var max = Int.MinValue
+    var newMovesMax = moves
     for {
       square <- s
     } {
-      println("Try to remove square: " + square.getX + "/" + square.getY + " and j is "+ j)
       if (square.getX != x || square.getY != y) {
+        //println("Try to remove square: " + square.getX + "/" + square.getY + " and j is "+ j)
         var min = Int.MaxValue
+        var newMovesMin = moves
         for {
           neighbor <- sq.neighbors
         } {
           square.visitable = false
+          
           if (s.contains(neighbor) && neighbor.visitable) {
             var newSet = s - square
             for {
@@ -218,19 +240,29 @@ class Board(rows: Int, cols: Int) {
                 newSet = s
               }
             }
-            val temp = d(neighbor, j-1, newSet)
-            if (temp < min) {
-              min = temp
+            val temp = d(neighbor, j-1, newSet, moves :+ square)
+            if (temp._1 < min) {
+              min = temp._1
+              newMovesMin = temp._2
+            } else if (temp._1 == min && temp._2.size < newMovesMin.size) {
+              min = temp._1
+              newMovesMin = temp._2
             }
           }
           square.visitable = true
         }        
         if (min > max) {
           max = min
+          newMovesMax = newMovesMin
+        } else if (min == max && newMovesMin.size < newMovesMax.size) {
+          max = min
+          newMovesMax = newMovesMin
         }
       }
     }
-    return max
+    //println("End Return with size : " + max + " and moves size: " + newMovesMax.size)
+    memory += ((sq, j, s) -> (max, newMovesMax))
+    return (max, newMovesMax)
   }
     
   
