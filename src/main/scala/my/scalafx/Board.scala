@@ -175,34 +175,62 @@ class Board(rows: Int, cols: Int) {
 
     // Find all connected sets of visitable squares
     val connectedSets = createConnectedSet()
+    for {
+      set <- connectedSets
+    } {
+     if (set.contains(squares(3)(3))) {
+        println(d(squares(3)(3), 10, set))
+     }
+    }
 
   }
 
   def d(sq: Square, j:Int, s: Set[Square]): Int = {
+    println("Try with sq: "+ sq.getX + "/" + sq.getY + " j: " + j)
+  
     val x = sq.getX
     val y = sq.getY
     if ( x==0 || y==0 || x==rows-1 || y==cols-1 || (j==0 && !isSetClosed(s))) {
-      return 0
+      return Int.MinValue
     }
 
     if ( j>=0 && isSetClosed(s)) {
       return s.size
     }
     
-    var i = 0
+    var max = Int.MinValue
     for {
       square <- s
     } {
-      if (square.getX != x && square.getY != y) {
-        
-        val sq2 = computeNextMove(sq, s-square)
-        val temp = d(sq2, j-1, s-square)
-        if (temp > i) {
-          i = temp
+      println("Try to remove square: " + square.getX + "/" + square.getY + " and j is "+ j)
+      if (square.getX != x || square.getY != y) {
+        var min = Int.MaxValue
+        for {
+          neighbor <- sq.neighbors
+        } {
+          square.visitable = false
+          if (s.contains(neighbor) && neighbor.visitable) {
+            var newSet = s - square
+            for {
+              s <- createConnectedSet(squares)
+            } {
+              if (s.contains(sq)) {
+                newSet = s
+              }
+            }
+            val temp = d(neighbor, j-1, newSet)
+            if (temp < min) {
+              min = temp
+            }
+          }
+          square.visitable = true
+        }        
+        if (min > max) {
+          max = min
         }
       }
     }
-    return i
+    return max
   }
     
   
@@ -215,13 +243,14 @@ class Board(rows: Int, cols: Int) {
     return sq
   }
 
+  /* 
   def n(sq: Square, s:Set[Square]): (Square, Int) = {
     val x = sq.getX
     val y = sq.getY
     if ( x==0 || y==0 || x==rows-1 || y==cols-1 || (j==0 && !isSetClosed(s))) {
       return (sq, 0)
     }
-
+    
     var i = 0
     var sq2 = sq
     for {
@@ -236,17 +265,18 @@ class Board(rows: Int, cols: Int) {
         }
         else if (temp._2 == i) {
           // down, left, up, right
-
+          
         }
       }
     }
-
+    
     return (sq2, i)
-
-
+    
+    
   }
+  */
   
-
+  
   def printConnectedSets(connectedSets: List[Set[Square]]): Unit = {
   for {
       s <- connectedSets
