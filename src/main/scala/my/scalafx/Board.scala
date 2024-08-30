@@ -289,7 +289,6 @@ class Board(rows: Int, cols: Int) {
         return value
       case None => 
     }
-      
 
     val x = sq.getX
     val y = sq.getY
@@ -387,11 +386,22 @@ class Board(rows: Int, cols: Int) {
           max = min
           newMovesMax = newMovesMin
         }
-          */
+        */
       }
     }
 
     //println("End Return with size : " + max + " and moves size: " + newMovesMax.size)
+    if (j == 10){
+      println("j1 Memory hit " + memoryHitj1)
+      println("j2 Memory hit " + memoryHitj2)
+      println("j3 Memory hit " + memoryHitj3)
+      println("j4 Memory hit " + memoryHitj4)
+      println("j5 Memory hit " + memoryHitj5)
+      println("j6 Memory hit " + memoryHitj6)
+      println("j7 Memory hit " + memoryHitj7)
+      println("j8 Memory hit " + memoryHitj8)
+      println("j9 Memory hit " + memoryHitj9)
+    }
     memory += ((sq, j, s) -> (max, newMovesMax))
     return (max, newMovesMax)
   }

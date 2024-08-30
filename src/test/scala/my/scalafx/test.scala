@@ -615,5 +615,50 @@ class TestReal extends AnyFunSuite {
     }
   }
 
+  test("test real example 2") {
+    val b = new Board(gridWidth, gridHeight)
+    b.getSquare(0,1).get.visitable = false
+    b.getSquare(0,4).get.visitable = false
+    
+    b.getSquare(1,1).get.visitable = false
+    b.getSquare(1,3).get.visitable = false
+    b.getSquare(1,5).get.visitable = false
+
+    b.getSquare(2,0).get.visitable = false
+
+    b.getSquare(3,4).get.visitable = false
+    b.getSquare(3,6).get.visitable = false
+
+    b.getSquare(4,3).get.visitable = false
+
+    b.getSquare(5,0).get.visitable = false
+    b.getSquare(5,5).get.visitable = false
+    b.getSquare(5,6).get.visitable = false
+
+    b.getSquare(6,0).get.visitable = false
+    b.getSquare(6,5).get.visitable = false
+
+    val connectedSets = b.createConnectedSet()
+    for {
+      set <- connectedSets
+    } {
+     if (set.contains(b.squares(3)(3))) {
+      val finalVal = b.d(b.squares(3)(3), 10, set, List())
+      for {
+        square <- finalVal._2
+      } {
+        println(square.getX + "/" + square.getY)
+      }
+
+      assertResult(13) {
+        finalVal._1
+      }
+      assertResult(10) {
+        finalVal._2.size
+      }
+     }
+    }
+  }
+
 
 }
