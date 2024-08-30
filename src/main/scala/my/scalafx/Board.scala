@@ -7,10 +7,21 @@ class Board(rows: Int, cols: Int) {
 
   var memory: Map[(Square, Int, Set[Square]), (Int, List[Square])] = Map()
   var memory2: Map[(Int, Set[Square]), (Int, List[Square])] = Map()
+  var memoryHitj0 = 0
+  var memoryHitj1 = 0
+  var memoryHitj2 = 0
+  var memoryHitj3 = 0
+  var memoryHitj4 = 0
+  var memoryHitj5 = 0
+  var memoryHitj6 = 0
+  var memoryHitj7 = 0
+  var memoryHitj8 = 0
+  var memoryHitj9 = 0
+
   // Initialize neighbors for each square
   for {
-    x <- 0 until rows
-    y <- 0 until cols
+    x <- 1 until rows-1
+    y <- 1 until cols-1
   } {
     val currentSquare = squares(x)(y)
     
@@ -96,6 +107,26 @@ class Board(rows: Int, cols: Int) {
     connectedSets
 
     
+  }
+
+  def recreateConnectedSet(s: Array[Array[Square]] = squares, current: Square) = {
+    var visited = Set[Square]()
+    val queue = scala.collection.mutable.Queue[Square]()
+
+    queue.enqueue(current)
+    visited += current
+
+    while (queue.nonEmpty) {
+      val current = queue.dequeue()
+      for (neighbor <- current.neighbors) {
+        if (neighbor.visitable && !visited.contains(neighbor)) {
+          queue.enqueue(neighbor)
+          visited += neighbor
+        }
+      }
+    }
+
+    visited
   }
 
   def isSetClosed(set: Set[Square]): Boolean = {
@@ -201,19 +232,73 @@ class Board(rows: Int, cols: Int) {
     
     val mem = memory.get((sq, j, s))
     mem match {
-      case Some(value) => return value
+      case Some(value) =>
+        j match {
+          case 0 => 
+            memoryHitj0 += 1
+            if (memoryHitj0 % 100000 == 0){
+              //println("j0 Memory hit " + memoryHitj0)
+            }
+          case 1 => 
+            memoryHitj1 += 1
+            if (memoryHitj1 % 100000 == 0){
+              println("j1 Memory hit " + memoryHitj1)
+            }
+          case 2 => 
+            memoryHitj2 += 1
+            if (memoryHitj2 % 100000 == 0){
+              println("j2 Memory hit " + memoryHitj2)
+            }
+          case 3 =>
+            memoryHitj3 += 1
+             if (memoryHitj3 % 100000 == 0){
+              println("j3 Memory hit " + memoryHitj3)
+            }
+          case 4 => 
+            memoryHitj4 += 1
+             if (memoryHitj4 % 100000 == 0){
+              println("j4 Memory hit " + memoryHitj4)
+            }
+          case 5 =>
+            memoryHitj5 += 1
+            if (memoryHitj5 % 100000 == 0){
+            println("j5 Memory hit " + memoryHitj5)
+            }
+          case 6 =>
+            memoryHitj6 += 1
+             if (memoryHitj6 % 100000 == 0){
+              println("j6 Memory hit " + memoryHitj6)
+            }
+          case 7 =>
+            memoryHitj7 += 1
+             if (memoryHitj7 % 100000 == 0){
+              println("j7 Memory hit " + memoryHitj7)
+            }
+          case 8 =>
+            memoryHitj8 += 1
+             if (memoryHitj8 % 100000 == 0){
+              println("j8 Memory hit " + memoryHitj8)
+            }
+          case 9 =>
+            memoryHitj9 += 1
+             if (memoryHitj9 % 100000 == 0){
+              println("j9 Memory hit " + memoryHitj9)
+            }
+        }
+        
+        return value
       case None => 
     }
       
 
     val x = sq.getX
     val y = sq.getY
-    if ( x==0 || y==0 || x==rows-1 || y==cols-1 || (j==0 && !isSetClosed(s))) {
+    if (x==0 || y==0 || x==rows-1 || y==cols-1 || (j==0 && !isSetClosed(s))) {
       memory += ((sq, j, s) -> (Int.MinValue, List()))
       return (Int.MinValue, List())
     }
 
-    if ( j>=0 && isSetClosed(s)) {
+    if (j>=0 && isSetClosed(s)) {
       //println("Return with size : " + s.size + " and moves size: " + moves.size)
       memory += ((sq, j, s) -> (s.size, moves))
       return (s.size, moves)
@@ -228,6 +313,48 @@ class Board(rows: Int, cols: Int) {
         //println("Try to remove square: " + square.getX + "/" + square.getY + " and j is "+ j)
         var min = Int.MaxValue
         var newMovesMin = moves
+        var nextMove : Square = null
+        for {
+          neighbor <- sq.neighbors
+        } {
+          if (neighbor.visitable && s.contains(neighbor) && neighbor != square) {
+            if (nextMove == null) {
+              nextMove = neighbor
+            } else if (neighbor.getY > nextMove.getY) {
+              nextMove = neighbor
+            } else if (neighbor.getY == nextMove.getY){
+              if (neighbor.getX > nextMove.getX) {
+                nextMove = neighbor
+              }
+            }
+          }
+        }
+        if (nextMove != null) {
+          //println("Next move is: " + nextMove.getX + "/" + nextMove.getY)
+          square.visitable = false
+          var newSet: Set[Square] = recreateConnectedSet(squares, nextMove)
+          /*
+            for {
+              connectedSets <- createConnectedSet(squares)
+            } {
+              if (connectedSets.contains(sq)) {
+                newSet = connectedSets
+              }
+            }
+          */
+
+          val temp = d(nextMove, j-1, newSet, moves :+ square)
+          if (temp._1 > max) {
+            max = temp._1
+            newMovesMax = temp._2
+          } else if (temp._1 == max && temp._2.size < newMovesMax.size) {
+            max = temp._1
+            newMovesMax = temp._2
+          }
+          square.visitable = true
+        }
+
+        /*
         for {
           neighbor <- sq.neighbors
         } {
@@ -260,6 +387,7 @@ class Board(rows: Int, cols: Int) {
           max = min
           newMovesMax = newMovesMin
         }
+          */
       }
     }
 
@@ -301,7 +429,7 @@ class Board(rows: Int, cols: Int) {
     for {
       square <- s
     } {
-      if(square.visitable){
+      if(square.visitable && square != starting) {
         square.visitable = false
         var newSet = s - square
         for {
@@ -325,6 +453,28 @@ class Board(rows: Int, cols: Int) {
     }
     memory2 += ((j, s) -> (max, newMovesMax))
     return (max, newMovesMax)
+  }
+
+  def maxSetWithoutCareOfMimic2(starting:Square, j: Int, s: Set[Square], moves: List[Square]): (Int, List[Square]) = {
+    // Find all set of square you can construct with j moves
+    for {
+      square <- s
+    } {
+      if (square.visitable) {
+        square.visitable = false
+        var newSet = s - square
+        for {
+          s <- createConnectedSet(squares)
+        } {
+          if (s.contains(starting)) {
+            newSet = s
+          }
+        }
+        val tempVal = maxSetWithoutCareOfMimic2(starting, j-1, newSet, moves :+ square)
+        square.visitable = true
+      }
+    }
+    return (0, List())
   }
 
   /* 
