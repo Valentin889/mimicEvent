@@ -297,14 +297,15 @@ class Board(rows: Int, cols: Int) {
 
     val x = sq.getX
     val y = sq.getY
+    var closed = isSetClosed(s)
     if (x==0 || y==0 || x==rows-1 || y==cols-1 || (j==0 && !isSetClosed(s))) {
-      memory += ((sq, j, s) -> (Int.MinValue, List()))
+      //memory += ((sq, j, s) -> (Int.MinValue, List()))
       return (Int.MinValue, List())
     }
 
     if (j>=0 && isSetClosed(s)) {
       //println("Return with size : " + s.size + " and moves size: " + moves.size)
-      memory += ((sq, j, s) -> (s.size, moves))
+      //memory += ((sq, j, s) -> (s.size, moves))
       return (s.size, moves)
     }
     
