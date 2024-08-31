@@ -11,6 +11,7 @@ import scalafx.scene.layout.Pane
 import scalafx.scene.shape.Polygon
 import scalafx.scene.layout.{HBox, Pane, VBox}
 import scalafx.scene.control.Button
+import scalafx.scene.Group
 
 object ScalaFXHelloWorld extends JFXApp3 {
 
@@ -23,7 +24,7 @@ object ScalaFXHelloWorld extends JFXApp3 {
   
 
   // Method to create a hexagon shape
-  def createHexagon(x: Double, y: Double, s: Square): Polygon = {
+  def createHexagon(x: Double, y: Double, s: Square): Group = {
     val hexagon = new Polygon()
     for (i <- 0 until 6) {
       val angle = Math.toRadians(60 * i)
@@ -31,7 +32,11 @@ object ScalaFXHelloWorld extends JFXApp3 {
       val yOffset = hexRadius * Math.sin(angle)
       hexagon.getPoints.addAll(x + xOffset, y + yOffset)
     }
-    hexagon.fill = Color.LightGray
+    if (s.visitable) {
+      hexagon.fill = Color.LightGray
+    } else {
+      hexagon.fill = Color.Gray
+    }
     hexagon.stroke = Color.Gray
 
     // Add mouse click event handler to toggle color
@@ -44,8 +49,25 @@ object ScalaFXHelloWorld extends JFXApp3 {
       }
     }
 
+    // Create a Group to hold both the hexagon and the text (if any)
+    val group = new Group()
+    group.children.add(hexagon)
 
-    hexagon
+    // If the number is greater than 0, create a Text node to display the number
+    if (s.number > 0) {
+      val text = new Text(x, y, s.number.toString)
+      text.fill = Color.Red // Set text color, adjust as needed
+      text.setStyle("-fx-font-size: 14px;") // Adjust font size as needed
+
+      // Center the text inside the hexagon
+      text.x = x - text.getBoundsInLocal.getWidth / 2
+      text.y = y + text.getBoundsInLocal.getHeight / 4
+
+      group.children.add(text)
+    }
+
+    // Return the group containing the hexagon (and text if applicable)
+    group
   }
 
   // Method to calculate hexagon positions and add them to the pane
@@ -71,13 +93,15 @@ object ScalaFXHelloWorld extends JFXApp3 {
     val resetButton = new Button("Reset")
 
     resetButton.onAction = _ => {
+      board.reset()
       hexGridPane.children.remove(0, hexGridPane.children.size())
       hexGridPane.children.addAll(createHexGrid().children)
-      board.reset()
     }
 
     startButton.onAction = _ => {
       board.start
+      hexGridPane.children.remove(0, hexGridPane.children.size())
+      hexGridPane.children.addAll(createHexGrid().children)
     }
     
     // Arrange buttons in a horizontal box

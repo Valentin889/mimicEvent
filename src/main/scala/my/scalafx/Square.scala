@@ -1,6 +1,6 @@
 package my.scalafx
 
-class Square(x: Int, y: Int, var visitable: Boolean) {
+class Square(x: Int, y: Int, var visitable: Boolean, var number: Int = 0) {
   var neighbors: List[Square] = List()
 
   // Define how to add a neighbor

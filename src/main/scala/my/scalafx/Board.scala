@@ -200,6 +200,7 @@ class Board(rows: Int, cols: Int) {
       y <- 0 until cols
     } {
       squares(x)(y).visitable = true
+      squares(x)(y).number = 0
     }
   }
 
@@ -214,12 +215,16 @@ class Board(rows: Int, cols: Int) {
       set <- connectedSets
     } {
      if (set.contains(squares(3)(3))) {
-        val finalVal = d(squares(3)(3), 1, set, List())
+        val finalVal = d(squares(3)(3), 10, set, List())
         println(finalVal._1)
+        var i = 1
         for {
           square <- finalVal._2
         } {
+          square.number = i
+          i += 1
           println(s"Square x: ${square.getX} y: ${square.getY}")
+
         }
      }
     }
